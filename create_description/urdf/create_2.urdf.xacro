@@ -4,6 +4,6 @@
   <xacro:include filename="$(find create_description)/urdf/create_2_gazebo.urdf.xacro" />
 
   <xacro:create_base wheel_separation="0.235" base_diameter="0.3485">
-    <mesh filename="package://create_description/meshes/create_2.dae" />
+    <mesh filename="package://create_description/meshes/create_2.stl" />
   </xacro:create_base>
 </robot>
