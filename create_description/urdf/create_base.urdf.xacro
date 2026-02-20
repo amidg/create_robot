@@ -158,11 +158,22 @@
     <xacro:create_wheel prefix="left" y_offset="${wheel_separation / 2}" wheel_radius="${wheel_radius}" wheel_width="${wheel_width}"/>
     <xacro:create_wheel prefix="right" y_offset="${wheel_separation / -2}" wheel_radius="${wheel_radius}" wheel_width="${wheel_width}"/>
 
+    <!-- Intermediate massless body needed for 2-DOF ball-caster approximation -->
+    <link name="front_turn_link">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.0001" />
+      <!-- I = 2/5 * m * r^2 for solid sphere r=0.018: ~1.3e-8; use 1e-7 for stability -->
+      <inertia ixx="0.0000001" ixy="0.0" ixz="0.0" iyy="0.0000001" iyz="0.0" izz="0.0000001" />
+    </inertial>
+    </link>
+
     <link name="front_wheel_link">
     <inertial>
       <origin xyz="0 0 0" />
-      <mass value="0.01" />
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001" />
+      <mass value="0.0001" />
+      <!-- I = 2/5 * m * r^2 for solid sphere r=0.018: ~1.3e-8; use 1e-7 for stability -->
+      <inertia ixx="0.0000001" ixy="0.0" ixz="0.0" iyy="0.0000001" iyz="0.0" izz="0.0000001" />
     </inertial>
 
     <visual>
@@ -173,33 +184,31 @@
     </visual>
 
     <collision>
-      <origin xyz="0 0 0" rpy="0 ${PI/2} ${PI/2}" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
         <sphere radius="0.018" />
       </geometry>
     </collision>
     </link>
 
-    <link name="front_turn_link">
-    <inertial>
-      <origin xyz="0 0 0" />
-      <mass value="0.01" />
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001" />
-    </inertial>
-    </link>
-
+    <!-- Ball-caster 2-DOF approximation:
+         Joint 1 (Y-axis): forward/backward rolling
+         Joint 2 (X-axis): lateral rolling
+         Together they allow free rolling in any direction, matching an omnidirectional ball caster -->
     <joint name="front_castor_joint" type="continuous">
       <origin xyz="0.13 0 0.0" rpy="0 0 0" />
       <parent link="base_link" />
       <child link="front_turn_link" />
-      <axis xyz="1 0 0" />
+      <axis xyz="0 1 0" />
+      <dynamics damping="0.0" friction="0.0"/>
     </joint>
-    
+
     <joint name="front_wheel_joint" type="continuous">
       <origin xyz="0 0 0.0" rpy="0 0 0" />
       <parent link="front_turn_link" />
       <child link="front_wheel_link" />
-      <axis xyz="0 1 0" />
+      <axis xyz="1 0 0" />
+      <dynamics damping="0.0" friction="0.0"/>
     </joint>
 
     <joint name="gyro_joint" type="fixed">
